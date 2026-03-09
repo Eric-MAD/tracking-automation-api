@@ -12,13 +12,13 @@
     "start": "node src/server.js"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "async-retry": "^1.3.3",
     "axios": "^1.13.6",
     "bull": "^4.16.5",
     "cors": "^2.8.6",
     "crypto-js": "^4.2.0",
-    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "googleapis": "^171.4.0",
@@ -33,6 +33,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/pg": "^8.18.0",
+    "dotenv": "^17.3.1",
     "nodemon": "^3.1.14",
     "prisma": "^7.4.2"
   }
