@@ -7,3 +7,15 @@ export const getAllTemplates = async () => {
     },
   });
 };
+
+export const getTemplateById = async (id) => {
+  return prisma.templates.findUnique({
+    where: { id },
+  });
+}
+
+export const createTemplate = async (templateData) => {
+  return prisma.templates.create({
+    data: templateData,
+  });
+};
