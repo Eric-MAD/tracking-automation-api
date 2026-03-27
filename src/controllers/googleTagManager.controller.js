@@ -1,49 +1,17 @@
 import oauth2Client from "../config/googleAuth.js"
-import { createConversionLinkerTag, listWorkspaceTags,listWorkspaceTriggers } from "../services/google/googleTagManager.services.js"
+import { listWorkspaceTags ,
+  listWorkspaceTriggers, createDynamicTrigger, createDynamicTag } from "../services/google/googleTagManager.services.js"
 import { getGoogleTokens } from "../utils/storeGoogleTokens.js"
-
-
-export const createTestTag = async (req, res) => {
-  try {
-    const { accountId, containerId, workspaceId } = req.body;
-    
-    if (!accountId || !containerId || !workspaceId) {
-      return res.status(400).json({
-        error: "Missing required parameters: accountId, containerId, workspaceId"
-      })
-    }
-
-    const tokens = getGoogleTokens()
-    if (!tokens) {
-      return res.status(401).json({ error: "Google tokens not found" })
-    }
-
-    oauth2Client.setCredentials(tokens);
-
-    const tag = await createConversionLinkerTag(
-      oauth2Client,
-      accountId,
-      containerId,
-      workspaceId
-    )
-
-    res.status(201).json({
-      message: "Tag created successfully",
-      tag: tag
-    })
-
-  } catch (error) {
-    // Si l'erreur persiste, on renvoie le message détaillé de Google
-    res.status(error.code || 500).json({
-      error: error.message,
-      details: error.errors || null
-    })
-  }
-}
+import { 
+  TRIGGER_TYPES, 
+  GTM_VARIABLES, 
+  GTM_OPERATORS 
+} from "../utils/googleTriggerTypes.js";
+import { TAG_TYPES } from "../utils/googleTagTypes.js";
 
 export const getTagsDiagnostic = async (req, res) => {
   try {
-    const { accountId, containerId, workspaceId } = req.body; // Ou req.query si vous préférez du GET
+    const { accountId, containerId, workspaceId } = req.body;
     
     if (!accountId || !containerId || !workspaceId) {
       return res.status(400).json({
@@ -123,6 +91,86 @@ export const getTriggersDiagnostic = async (req, res) => {
       triggers: detailedTriggers
     });
 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const handleCreateTrigger = async (req, res) => {
+  try {
+    const { accountId, containerId, workspaceId, triggerData } = req.body;
+    if (!accountId || !containerId || !workspaceId || !triggerData) {
+      return res.status(400).json({ error: "Missing parameters" });
+    }
+
+    const tokens = getGoogleTokens();
+    if (!tokens) return res.status(401).json({ error: "Google tokens not found" });
+    oauth2Client.setCredentials(tokens);
+
+    const formattedConfig = {
+      name: triggerData.name,
+      type: TRIGGER_TYPES[triggerData.typeKey],
+      conditions: triggerData.conditions.map(c => ({
+        variable: GTM_VARIABLES[c.varKey],
+        operator: GTM_OPERATORS[c.opKey],
+        value: c.value
+      }))
+    };
+
+    const newTrigger = await createDynamicTrigger(
+      oauth2Client,
+      accountId,
+      containerId,
+      workspaceId,
+      formattedConfig
+    );
+
+    res.status(201).json({
+      message: "Trigger créé avec succès",
+      trigger: newTrigger
+    });
+
+  } catch (error) {
+    res.status(error.code || 500).json({
+      error: error.message,
+      details: error.errors || null
+    });
+  }
+};
+
+export const handleCreateTag = async (req, res) => {
+  try {
+    const { accountId, containerId, workspaceId, tagData } = req.body;
+    const tokens = getGoogleTokens();
+    oauth2Client.setCredentials(tokens);
+    let parameters = {};
+
+    if (tagData.typeKey === 'GOOGLE_TAG') {
+      parameters = { tagId: tagData.trackingId };
+    } else if (tagData.typeKey === 'CONVERSION_LINKER') {
+      parameters = {
+        enableCrossDomain: false,
+        enableUrlPassthrough: false,
+        enableCookieOverrides: false
+      };
+    }
+
+    const formattedConfig = {
+      name: tagData.name,
+      type: TAG_TYPES[tagData.typeKey],
+      parameters: parameters,
+      firingTriggerIds: tagData.triggerIds
+    };
+
+    const newTag = await createDynamicTag(
+      oauth2Client,
+      accountId,
+      containerId,
+      workspaceId,
+      formattedConfig
+    );
+
+    res.status(201).json(newTag);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
