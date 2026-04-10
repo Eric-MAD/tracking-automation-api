@@ -112,3 +112,74 @@ export const createDynamicTag = async (auth, accountId, containerId, workspaceId
 
   return response.data;
 };
+
+
+const getTagByName = async (auth, accountId, containerId, workspaceId, name) => {
+  const tags = await listWorkspaceTags(auth, accountId, containerId, workspaceId)
+  return tags.find(t => t.name === name)
+}
+
+const getTriggerByName = async (auth, accountId, containerId, workspaceId, name) => {
+  const triggers = await listWorkspaceTriggers(auth, accountId, containerId, workspaceId)
+  return triggers.find(t => t.name === name)
+}
+
+export const createDynamicTriggerSafe = async (
+  auth,
+  accountId,
+  containerId,
+  workspaceId,
+  config
+) => {
+
+  const existing = await getTriggerByName(
+    auth,
+    accountId,
+    containerId,
+    workspaceId,
+    config.name
+  )
+
+  if (existing) {
+    console.log(`Trigger "${config.name}" already exists`)
+    return existing
+  }
+
+  return await createDynamicTrigger(
+    auth,
+    accountId,
+    containerId,
+    workspaceId,
+    config
+  )
+}
+
+export const createDynamicTagSafe = async (
+  auth,
+  accountId,
+  containerId,
+  workspaceId,
+  config
+) => {
+
+  const existing = await getTagByName(
+    auth,
+    accountId,
+    containerId,
+    workspaceId,
+    config.name
+  )
+
+  if (existing) {
+    console.log(`Tag "${config.name}" already exists`)
+    return existing
+  }
+
+  return await createDynamicTag(
+    auth,
+    accountId,
+    containerId,
+    workspaceId,
+    config
+  )
+}

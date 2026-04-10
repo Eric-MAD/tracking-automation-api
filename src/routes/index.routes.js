@@ -3,6 +3,7 @@ import { sendSuccess } from '../utils/response.js';
 import templateRoutes from './templates.routes.js';
 import googleAuthRoutes from './googleAuth.routes.js';
 import googleRoutes from './google.routes.js';
+import baseTrackingRoutes from './baseTracking.routes.js';
 
 const router = Router();
 
@@ -12,4 +13,5 @@ router.get('/health', (req, res) => {
 router.use('/templates', templateRoutes);
 router.use('/auth', googleAuthRoutes);
 router.use('/google', googleRoutes);
+router.use('/base-tracking', baseTrackingRoutes);
 export default router;
