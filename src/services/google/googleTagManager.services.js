@@ -183,3 +183,55 @@ export const createDynamicTagSafe = async (
     config
   )
 }
+
+export const createTriggerFromConfig = async (
+  auth,
+  accountId,
+  containerId,
+  workspaceId,
+  config 
+) => {
+  const tagmanager = google.tagmanager({ version: "v2", auth });
+  const parent = `accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}`;
+
+  const triggers = await listWorkspaceTriggers(auth, accountId, containerId, workspaceId);
+  const existing = triggers.find(t => t.name === config.name);
+
+  if (existing) {
+    console.log(`Trigger "${config.name}" already exists`);
+    return existing;
+  }
+
+  const response = await tagmanager.accounts.containers.workspaces.triggers.create({
+    parent,
+    requestBody: config 
+  });
+
+  return response.data;
+};
+
+export const createTagFromConfig = async (
+  auth,
+  accountId,
+  containerId,
+  workspaceId,
+  config
+) => {
+  const tagmanager = google.tagmanager({ version: "v2", auth });
+  const parent = `accounts/${accountId}/containers/${containerId}/workspaces/${workspaceId}`;
+
+  const tags = await listWorkspaceTags(auth, accountId, containerId, workspaceId);
+  const existing = tags.find(t => t.name === config.name);
+
+  if (existing) {
+    console.log(`Tag "${config.name}" already exists`);
+    return existing;
+  }
+
+  const response = await tagmanager.accounts.containers.workspaces.tags.create({
+    parent,
+    requestBody: config
+  });
+
+  return response.data;
+};

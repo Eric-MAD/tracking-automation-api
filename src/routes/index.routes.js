@@ -4,6 +4,7 @@ import templateRoutes from './templates.routes.js';
 import googleAuthRoutes from './googleAuth.routes.js';
 import googleRoutes from './google.routes.js';
 import baseTrackingRoutes from './baseTracking.routes.js';
+import ecommerceTemplateRoutes from './ecommerceTemplate.routes.js';
 
 const router = Router();
 
@@ -14,4 +15,5 @@ router.use('/templates', templateRoutes);
 router.use('/auth', googleAuthRoutes);
 router.use('/google', googleRoutes);
 router.use('/base-tracking', baseTrackingRoutes);
+router.use('/ecommerce-template', ecommerceTemplateRoutes);
 export default router;

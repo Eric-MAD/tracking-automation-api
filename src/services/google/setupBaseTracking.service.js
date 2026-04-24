@@ -8,8 +8,7 @@ export const setupBaseTracking = async (
   config
 ) => {
 
-  // Trigger All Pages (SAFE)
-  const pageViewTrigger = await createDynamicTriggerSafe(
+  const conversionLinkerTrigger = await createDynamicTriggerSafe(
     auth,
     accountId,
     containerId,
@@ -18,7 +17,18 @@ export const setupBaseTracking = async (
       name: "All Pages",
       type: "pageview"
     }
-  )
+  );
+
+  const googleTagTrigger = await createDynamicTriggerSafe(
+    auth,
+    accountId,
+    containerId,
+    workspaceId,
+    {
+      name: "Initialization - All Pages",
+      type: "init"
+    }
+  );
 
   // Conversion Linker
   const conversionLinker = await createDynamicTagSafe(
@@ -30,7 +40,7 @@ export const setupBaseTracking = async (
       name: "Conversion Linker",
       type: "gclidw",
       parameters: {},
-      firingTriggerIds: [pageViewTrigger.triggerId]
+      firingTriggerIds: [conversionLinkerTrigger.triggerId]
     }
   )
 
@@ -46,7 +56,7 @@ export const setupBaseTracking = async (
       parameters: {
         tagId: config.ga4MeasurementId 
       },
-      firingTriggerIds: [pageViewTrigger.triggerId]
+      firingTriggerIds: [googleTagTrigger.triggerId]
     }
   )
 
@@ -62,13 +72,13 @@ export const setupBaseTracking = async (
       parameters: {
         tagId: config.gadsMeasurementId
       },
-      firingTriggerIds: [pageViewTrigger.triggerId]
+      firingTriggerIds: [googleTagTrigger.triggerId]
     }
   )
 
   return {
     success: true,
-    triggerId: pageViewTrigger.triggerId,
+    triggerId: [{ conversionLinkerTriggerId: conversionLinkerTrigger.triggerId }, { googleTagTriggerId: googleTagTrigger.triggerId }],
     tags: {
       conversionLinker,
       ga4GoogleTag,

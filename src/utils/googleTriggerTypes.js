@@ -17,8 +17,8 @@ export const GTM_VARIABLES = {
 };
 
 export const TRIGGER_TYPES = {
-  INITIALIZATION: 'INIT',  
-  CONSENT_INIT: 'CONSENT_INIT',
+  INITIALIZATION: 'init',  
+  CONSENT_INIT: 'consent_init',
   PAGE_VIEW: 'pageview',
   CLICK_ALL: 'click',
   CLICK_LINKS: 'linkClick',
